@@ -27,6 +27,7 @@ class RedirectHandler(BaseHandler):
         """Make an API request to JupyterHub"""
         headers = kwargs.setdefault('headers', {})
         headers.update({'Authorization': 'token %s' % self.settings['hub_api_token']})
+        app_log.info("headers %r" % headers)
         req = HTTPRequest(self.settings['hub_url'] + 'hub/api/' + url, *args, **kwargs)
         resp = await AsyncHTTPClient().fetch(req)
         # TODO: handle errors

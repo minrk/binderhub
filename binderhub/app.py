@@ -156,8 +156,16 @@ class BinderHub(Application):
 
     def initialize(self, *args, **kwargs):
         """Load configuration settings."""
+        import sys
+        print(sys.stdout, file=sys.__stderr__)
+        print('in initialize')
         super().initialize(*args, **kwargs)
         self.load_config_file(self.config_file)
+        print(self.config_file)
+        print('exists', os.path.exists(self.config_file))
+        print(self.config, file=sys.__stderr__)
+        print(os.getcwd(), file=sys.__stderr__)
+        print(os.listdir('.'))
         # hook up tornado logging
         tornado.options.logging = logging.getLevelName(self.log_level)
         tornado.log.enable_pretty_logging()
@@ -206,4 +214,5 @@ class BinderHub(Application):
 main = BinderHub.launch_instance
 
 if __name__ == '__main__':
+    print('main')
     main()
