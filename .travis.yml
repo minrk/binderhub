@@ -3,7 +3,8 @@ python:
 - 3.6
 services:
 - docker
-install:
+before_install:
+- pip install --upgrade pip
 - pip install --no-cache-dir ruamel.yaml
 - mkdir -p bin
 - export PATH=$PWD/bin:$PATH
@@ -11,24 +12,21 @@ install:
   | tar -xz -C bin --strip-components 1 linux-amd64/helm
 - chmod +x bin/helm
 - helm init --client-only
+# Install git-crypt
+- |
+  curl -L https://github.com/minrk/git-crypt-bin/releases/download/0.5.0/git-crypt > git-crypt
+  shasum -a 256 46c288cc849c23a28239de3386c6050e5c7d7acd50b1d0248d86e6efff09c61b git-crypt
+  chmod +x git-crypt
+  mv git-crypt ${HOME}/bin/git-crypt
+install:
+- pip install -r test-requirements.txt -e .
+
 script:
-- |
-  if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-    docker login -u ${DOCKER_USERNAME} -p "${DOCKER_PASSWORD}"
-    export PUSH="--push"
-    mkdir -p ${HOME}/git-crypt && curl -L https://github.com/AGWA/git-crypt/archive/0.5.0.tar.gz | tar --directory ${HOME}/git-crypt --gzip --file - --extract --strip-components=1 && cd ${HOME}/git-crypt && make 
-    cd - 
-  fi
-- "./helm-chart/build.py build --commit-range ${TRAVIS_COMMIT_RANGE} $PUSH"
-branches:
-  only:
-  - master
-before_install:
-- |
-  if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-    openssl aes-256-cbc -K $encrypted_d8355cc3d845_key -iv $encrypted_d8355cc3d845_iv -in travis.enc -out travis -d
-    chmod 0400 travis
-  fi
+- pytest --cov binderhub --pyargs binderhub
+- ./ci/deploy.sh
+after_success:
+- codecov
+
 env:
   global:
   - secure: BuO4oUz5YZvWhH919Tk8h3McM60NybLImIwB+0C4cmcDC/Z4uS1Jh8R8UbD3vIkJyjPgd+WuoaYGzzgJfCiS5i5TZZfi5yI0URu67fc044vaS7zSegZWsuN40mP4QNYTb+VdYniav8pqqyPyUpKNbOQ+/YJ+BWrC/ncqSL+P+UR6PE9T3TQ4XDuB45z0B2hhfDWBMpP6KtGae7YOWstIPi8ufiS76jjRzE4ziLqsOSwJRGhRbjJXqdcZeH2d54jUJSzCEGMSo5lxrFL27YOJ6Vuzr0V208AiQe60CyxtAzyiamVoE9U8pYOnv9KRDMeROSdz2HJkGetedNgCHpf0mNUWLZzQ6udzXtKeG2pxKeLDYKSm8Y3GGGa87nWRaWS1dYwCTHLe1r6Jwt6QwuBqqIa0oOMujStTEgbUOLLw5e80kSWqTxb52XnDi5SgOMGNzcylAYJLHFCL5U9ShAyZWGRAy0p7tFycXy44/k7RiqXr6Xur7NuB9bzXkmsDa7qS1t2DXoUA8FlpxfvqaSqVuFSrN16JHQeBOZGEYondQ2NPvi2vNT68Us4saWUxBf8oxF5pctbJYDDOxWpYFq/pza2+Elset9dv5KjCb61qtotLpo4PER4zgvde5/5HRa1CAOJlVfZB1Au3+b1NoVWNnPcwlb2UGut1+bcaDWyPf20=
