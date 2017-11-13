@@ -11,6 +11,7 @@ import time
 import docker
 from kubernetes import client
 from tornado import gen, web
+from tornado.concurrent import Future
 from tornado.queues import Queue
 from tornado.iostream import StreamClosedError
 from tornado.ioloop import IOLoop
@@ -31,6 +32,8 @@ class BuildHandler(BaseHandler):
     """A handler for working with GitHub."""
     # emit keepalives every 25 seconds to avoid idle connections being closed
     KEEPALIVE_INTERVAL = 25
+    _build_finished = False
+    _abort_launch = None
 
     async def emit(self, data):
         if type(data) is not str:
@@ -48,6 +51,9 @@ class BuildHandler(BaseHandler):
     def on_finish(self):
         """Stop keepalive when finish has been called"""
         self._keepalive = False
+        self._build_finished = True
+        if self._abort_launch:
+            self._abort_launch.set_result(None)
 
     async def keep_alive(self):
         """Constantly emit keepalive events
@@ -280,9 +286,13 @@ class BuildHandler(BaseHandler):
         # build finished, time to launch!
         launcher = self.settings['launcher']
         username = launcher.username_from_repo(self.repo)
+        self._abort_launch = Future()
         try:
             launch_starttime = time.perf_counter()
-            server_info = await launcher.launch(image=self.image_name, username=username)
+            server_info = await launcher.launch(image=self.image_name, username=username, abort_future=self._abort_launch)
+            if self._abort_launch.done():
+                app_log.info("Aborted launch for %s", username)
+                return
             LAUNCH_TIME.labels(status='success').observe(time.perf_counter() - launch_starttime)
         except:
             LAUNCH_TIME.labels(status='failure').observe(time.perf_counter() - launch_starttime)
