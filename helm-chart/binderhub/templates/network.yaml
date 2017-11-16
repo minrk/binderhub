@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: binder-pod-egress
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      component: singleuser-server
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # only allow incoming connections from Hub and ingress-controller
+  - from:
+    - podSelector:
+        matchLabels:
+          name: hub-pod
+    - podSelector:
+        matchLabels:
+          name: proxy-pod
+  egress:
+  # allow connections to ports 80, 443 everywhere *except* LAN
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        # TODO: is this right?
+        # Is the cluster subnet in a variable somewhere?
+        - 10.0.0.0/8
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
