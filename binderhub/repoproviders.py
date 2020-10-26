@@ -37,8 +37,8 @@ def tokenize_spec(spec):
     spec_parts = spec.split('/', 2)  # allow ref to contain "/"
     if len(spec_parts) != 3:
         msg = 'Spec is not of the form "user/repo/ref", provided: "{spec}".'.format(spec=spec)
-        if len(spec_parts) == 2 and spec_parts[-1] != 'master':
-            msg += ' Did you mean "{spec}/master"?'.format(spec=spec)
+        if len(spec_parts) == 2 and spec_parts[-1] not in {"master", "main"}:
+            msg += ' Did you mean "{spec}/main"?'.format(spec=spec)
         raise ValueError(msg)
 
     return spec_parts
