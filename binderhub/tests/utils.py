@@ -3,10 +3,11 @@ import io
 from urllib.parse import urlparse
 
 from tornado import gen
-from tornado.httputil import HTTPHeaders
-from tornado.httpclient import HTTPError, HTTPRequest, HTTPResponse
-
 from tornado.curl_httpclient import CurlAsyncHTTPClient
+from tornado.httpclient import HTTPError
+from tornado.httpclient import HTTPRequest
+from tornado.httpclient import HTTPResponse
+from tornado.httputil import HTTPHeaders
 
 
 class MockAsyncHTTPClient(CurlAsyncHTTPClient):
@@ -18,7 +19,7 @@ class MockAsyncHTTPClient(CurlAsyncHTTPClient):
 
         to avoid caching things like access tokens
         """
-        return url.split('?')[0]
+        return url.split("?")[0]
 
     def fetch_mock(self, request):
         """Fetch a mocked request
@@ -31,24 +32,24 @@ class MockAsyncHTTPClient(CurlAsyncHTTPClient):
             HTTPError if the cached response has status >= 400
         """
         mock_data = self.mocks[self.url_key(request.url)]
-        code = mock_data.get('code', 200)
-        headers = HTTPHeaders(mock_data.get('headers', {}))
+        code = mock_data.get("code", 200)
+        headers = HTTPHeaders(mock_data.get("headers", {}))
         response = HTTPResponse(request, code, headers=headers)
-        response.buffer = io.BytesIO(mock_data['body'].encode('utf8'))
+        response.buffer = io.BytesIO(mock_data["body"].encode("utf8"))
         if code >= 400:
-            raise HTTPError(mock_data['code'], response=response)
+            raise HTTPError(mock_data["code"], response=response)
 
         return response
 
     def _record_response(self, url_key, response):
         """Record a response in self.records"""
-        if urlparse(url_key).hostname in ('127.0.0.1', 'localhost'):
+        if urlparse(url_key).hostname in ("127.0.0.1", "localhost"):
             # don't record localhost requests
             return
         self.records[url_key] = {
-            'code': response.code,
-            'headers': dict(response.headers),
-            'body': response.body.decode('utf8'),
+            "code": response.code,
+            "headers": dict(response.headers),
+            "body": response.body.decode("utf8"),
         }
 
     async def fetch(self, req_or_url, *args, **kwargs):
@@ -97,6 +98,7 @@ class _AsyncRequests:
 
     A single thread is allocated to avoid blocking the IOLoop thread.
     """
+
     _session = None
 
     def __init__(self):
@@ -121,12 +123,14 @@ class _AsyncRequests:
     async def iter_lines(self, response):
         """Asynchronously iterate through the lines of a response"""
         it = response.iter_lines()
+
         def _next():
             try:
                 return next(it)
             except StopIteration:
                 # asyncio Future cannot have StopIteration as a result
                 return
+
         while True:
             line = await self._submit(_next)
             if line is None:

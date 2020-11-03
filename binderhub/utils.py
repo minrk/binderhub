@@ -1,9 +1,10 @@
 """Miscellaneous utilities"""
+import time
 from collections import OrderedDict
 from hashlib import blake2b
-import time
 
-from traitlets import Integer, TraitError
+from traitlets import Integer
+from traitlets import TraitError
 
 
 def blake2b_hash_as_int(b):

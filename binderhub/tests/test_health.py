@@ -1,5 +1,4 @@
 """Test health handler"""
-
 from .utils import async_requests
 
 

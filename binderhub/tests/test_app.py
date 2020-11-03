@@ -1,11 +1,11 @@
 """Exercise the binderhub entrypoint"""
-
-from subprocess import check_output
 import sys
+from subprocess import check_output
+
 
 def test_help():
-    check_output([sys.executable, '-m', 'binderhub', '-h'])
+    check_output([sys.executable, "-m", "binderhub", "-h"])
+
 
 def test_help_all():
-    check_output([sys.executable, '-m', 'binderhub', '--help-all'])
-
+    check_output([sys.executable, "-m", "binderhub", "--help-all"])

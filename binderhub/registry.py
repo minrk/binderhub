@@ -6,10 +6,13 @@ import json
 import os
 from urllib.parse import urlparse
 
-from tornado import gen, httpclient
+from tornado import gen
+from tornado import httpclient
 from tornado.httputil import url_concat
+from traitlets import default
+from traitlets import Dict
+from traitlets import Unicode
 from traitlets.config import LoggingConfigurable
-from traitlets import Dict, Unicode, default
 
 DEFAULT_DOCKER_REGISTRY_URL = "https://registry.hub.docker.com"
 DEFAULT_DOCKER_AUTH_URL = "https://index.docker.io/v1"
@@ -192,7 +195,9 @@ class DockerRegistry(LoggingConfigurable):
         # first, get a token to perform the manifest request
         if self.token_url:
             auth_req = httpclient.HTTPRequest(
-                url_concat(self.token_url, {"scope": "repository:{}:pull".format(image)}),
+                url_concat(
+                    self.token_url, {"scope": "repository:{}:pull".format(image)}
+                ),
                 auth_username=self.username,
                 auth_password=self.password,
             )
@@ -204,14 +209,13 @@ class DockerRegistry(LoggingConfigurable):
             elif "access_token" in response_body.keys():
                 token = response_body["access_token"]
 
-            req = httpclient.HTTPRequest(url,
-                headers={"Authorization": "Bearer {}".format(token)},
+            req = httpclient.HTTPRequest(
+                url, headers={"Authorization": "Bearer {}".format(token)},
             )
         else:
             # Use basic HTTP auth (htpasswd)
-            req = httpclient.HTTPRequest(url,
-                auth_username=self.username,
-                auth_password=self.password,
+            req = httpclient.HTTPRequest(
+                url, auth_username=self.username, auth_password=self.password,
             )
 
         try:

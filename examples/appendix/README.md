@@ -40,4 +40,3 @@ So when notebook app starts, it uses customized templates.
 
 2. Inject Javascript code into `~/.jupyter/custom/custom.js`. This is 
 executed when the notebook app starts and it adds the buttons.
-

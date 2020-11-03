@@ -1,0 +1,24 @@
+repos:
+- repo: https://github.com/asottile/reorder_python_imports
+  rev: v1.9.0
+  hooks:
+  - id: reorder-python-imports
+    exclude: versioneer.py
+- repo: https://github.com/psf/black
+  rev: 19.10b0
+  hooks:
+  - id: black
+    exclude: versioneer.py
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.4.0
+  hooks:
+  - id: end-of-file-fixer
+  - id: check-json
+  - id: check-yaml
+    exclude: helm-chart/binderhub/templates  # these are templates, not valid yaml
+  - id: check-case-conflict
+  - id: check-executables-have-shebangs
+  - id: requirements-txt-fixer
+    exclude: images/binderhub/requirements.txt  # managed by pip-compile
+  - id: flake8
+    exclude: versioneer.py
