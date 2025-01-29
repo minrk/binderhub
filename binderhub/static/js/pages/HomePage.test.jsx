@@ -22,7 +22,7 @@ test("updates launch URL with git repo", async () => {
   const repositoryField = screen.getByRole("textbox", {
     name: "Enter repository URL",
   });
-  await user.type(repositoryField, "org/repo");
+  await user.type(repositoryField, "org/repo/");
   expect(
     screen.getByText("http://local.com/v2/gh/org/repo/HEAD"),
   ).toBeInTheDocument();

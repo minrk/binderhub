@@ -23,6 +23,8 @@ export function HomePage({ providers, publicBaseUrl, baseUrl }) {
   const [progressState, setProgressState] = useState(null);
 
   useEffect(() => {
+    // trim trailing slash from repo
+    repo = repo.replace(/\/+$/, "");
     const encodedRepo = selectedProvider.repo.urlEncode
       ? encodeURIComponent(repo)
       : repo;

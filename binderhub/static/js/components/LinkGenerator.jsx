@@ -127,6 +127,8 @@ function UrlSelector({ setUrlPath }) {
  * @returns
  */
 function makeShareableUrl(publicBaseUrl, provider, repo, ref, urlPath) {
+  // trim trailing slash from repo
+  repo = repo.replace(/\/+$/, "");
   const encodedRepo = provider.repo.urlEncode ? encodeURIComponent(repo) : repo;
   const url = new URL(`v2/${provider.id}/${encodedRepo}/${ref}`, publicBaseUrl);
   if (urlPath) {
